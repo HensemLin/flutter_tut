@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:mynotes/constants/routes.dart';
 import 'package:mynotes/services/auth/auth_exceptions.dart';
-import 'package:mynotes/services/auth/auth_service.dart';
+import 'package:mynotes/services/auth/bloc/auth_bloc.dart';
+import 'package:mynotes/services/auth/bloc/auth_event.dart';
+import 'package:mynotes/services/auth/bloc/auth_state.dart';
 import 'package:mynotes/utilities/dialogs/error_dialog.dart';
 
 class LoginView extends StatefulWidget {
@@ -49,46 +52,39 @@ class _LoginViewState extends State<LoginView> {
             autocorrect: false,
             decoration: const InputDecoration(hintText: "Enter your password"),
           ),
-          TextButton(
-            onPressed: () async {
-              final email = _email.text;
-              final password = _password.text;
-              final navigator = Navigator.of(context);
-
-              try {
-                await AuthService.firebase().logIn(
-                  email: email,
-                  password: password,
-                );
-                final user = AuthService.firebase().currentUser;
-                if (user?.isEmailVerified ?? false) {
-                  navigator.pushNamedAndRemoveUntil(
-                    notesRoute,
-                    (route) => false,
-                  );
-                } else {
-                  navigator.pushNamedAndRemoveUntil(
-                    verifyEmailRoute,
-                    (route) => false,
-                  );
-                }
-              } on UserNotFoundAuthExecption {
-                if (mounted) {
-                  await showErrorDialog(
-                    context,
-                    "User not found",
-                  );
-                }
-              } on GenericAuthException {
-                if (mounted) {
-                  await showErrorDialog(
-                    context,
-                    'Authentication Error',
-                  );
+          BlocListener<AuthBloc, AuthState>(
+            listener: (context, state) async {
+              if (state is AuthStateLoggedOut) {
+                if (state.exception is UserNotFoundAuthExecption) {
+                  if (mounted) {
+                    await showErrorDialog(
+                      context,
+                      "User not found",
+                    );
+                  }
+                } else if (state.exception is GenericAuthException) {
+                  if (mounted) {
+                    await showErrorDialog(
+                      context,
+                      'Authentication Error',
+                    );
+                  }
                 }
               }
             },
-            child: const Text('Login'),
+            child: TextButton(
+              onPressed: () async {
+                final email = _email.text;
+                final password = _password.text;
+                context.read<AuthBloc>().add(
+                      AuthEventLogIn(
+                        email,
+                        password,
+                      ),
+                    );
+              },
+              child: const Text('Login'),
+            ),
           ),
           TextButton(
               onPressed: () {
