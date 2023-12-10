@@ -59,11 +59,11 @@ Follow these steps to run the app locally
 
 1. Clon ethe repository
    ```bash
-   git clone https://github.com/yourusername/flutter-firebase-notes-tutorial.git
+   git clone https://github.com/HensemLin/flutter_tut.git
    ```
 3. Navigate to the project directory
    ```bash
-   cd flutter-firebase-notes-tutorial
+   cd flutter_tut
    ```
 5. Install dependencies
    ```bash
