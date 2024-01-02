@@ -1,10 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:mynotes/classes/language.dart';
+import 'package:mynotes/main.dart';
 import 'package:mynotes/services/auth/auth_exceptions.dart';
 import 'package:mynotes/services/auth/bloc/auth_bloc.dart';
 import 'package:mynotes/services/auth/bloc/auth_event.dart';
 import 'package:mynotes/services/auth/bloc/auth_state.dart';
 import 'package:mynotes/utilities/dialogs/error_dialog.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 class LoginView extends StatefulWidget {
   const LoginView({super.key});
@@ -54,7 +57,24 @@ class _LoginViewState extends State<LoginView> {
         }
       },
       child: Scaffold(
-        appBar: AppBar(title: const Text("Login")),
+        appBar: AppBar(
+          title: Text(AppLocalizations.of(context)!.login),
+          actions: [
+            PopupMenuButton(
+              onSelected: (value) async {
+                if (mounted) {
+                  MyApp.setLocale(context, Locale(value));
+                }
+              },
+              itemBuilder: (context) {
+                return Language.languageList().map((lang) {
+                  return PopupMenuItem(
+                      value: lang.languageCode, child: Text(lang.name));
+                }).toList();
+              },
+            )
+          ],
+        ),
         body: Padding(
           padding: const EdgeInsets.all(16.0),
           child: Column(
